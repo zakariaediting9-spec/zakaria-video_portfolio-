@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zakaria — Video Editor &amp; Cinematic Storyteller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0a08;
+    --bg-alt:#141009;
+    --surface:#1b150d;
+    --surface-line: rgba(242,236,225,0.09);
+    --text:#f3ede1;
+    --text-dim:#b6a892;
+    --text-faint:#7c705d;
+    --accent:#dd9a54;
+    --accent-soft:#e8b579;
+    --accent-deep:#a35a30;
+    --glow: rgba(221,154,84,0.28);
+    --maxw: 1180px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    font-weight:400;
+    line-height:1.6;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* film grain overlay, sits over everything */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:999;
+    opacity:0.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,h2,h3{ font-family:'Fraunces', serif; font-weight:500; letter-spacing:-0.01em; }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 32px; }
+  .eyebrow{
+    font-family:'Space Mono', monospace; font-size:11.5px; letter-spacing:0.22em;
+    text-transform:uppercase; color:var(--accent-soft); display:flex; align-items:center; gap:12px;
+  }
+  .eyebrow::before{ content:''; width:26px; height:1px; background:var(--accent-deep); display:inline-block; }
+
+  a{ color:inherit; }
+
+  /* horizon divider — the signature element */
+  .horizon{
+    position:relative; height:1px; width:100%;
+    background:linear-gradient(90deg, transparent, var(--accent-deep) 20%, var(--accent) 50%, var(--accent-deep) 80%, transparent);
+    opacity:0.55;
+    box-shadow:0 0 24px 1px var(--glow);
+  }
+
+  /* ============ NAV ============ */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:26px 40px; mix-blend-mode:normal;
+    background:linear-gradient(180deg, rgba(12,10,8,0.85), transparent);
+  }
+  .logo{ font-family:'Fraunces', serif; font-style:italic; font-size:21px; letter-spacing:0.02em; }
+  nav ul{ list-style:none; display:flex; gap:34px; }
+  nav a{ font-size:13px; letter-spacing:0.04em; text-decoration:none; color:var(--text-dim); transition:color .3s; }
+  nav a:hover{ color:var(--accent-soft); }
+  .nav-links{ display:flex; }
+  @media (max-width:760px){ .nav-links{ display:none; } }
+
+  /* ============ HERO ============ */
+  .hero{
+    position:relative; min-height:100vh; display:flex; flex-direction:column;
+    justify-content:center; align-items:center; text-align:center;
+    padding:140px 24px 90px;
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 100%, rgba(163,90,48,0.22), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(30,22,14,0.9), transparent 60%),
+      var(--bg);
+    overflow:hidden;
+  }
+  .hero-glow{
+    position:absolute; bottom:-10%; left:50%; transform:translateX(-50%);
+    width:140%; height:340px; border-radius:50%;
+    background:radial-gradient(ellipse, var(--glow), transparent 70%);
+    filter:blur(30px); animation:pulse 8s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:0.55;} 50%{opacity:1;} }
+
+  .hero .eyebrow{ justify-content:center; margin-bottom:22px; }
+  .hero .eyebrow::before{ display:none; }
+  .hero h1{
+    font-size:clamp(52px, 10vw, 118px); line-height:0.95; letter-spacing:-0.02em;
+    position:relative; z-index:2;
+  }
+  .hero h1 em{ font-style:italic; color:var(--accent-soft); font-weight:400; }
+  .hero p.tag{
+    margin-top:22px; font-size:clamp(15px,2vw,19px); color:var(--text-dim);
+    max-width:520px; font-weight:300; position:relative; z-index:2;
+  }
+
+  .hero-video{
+    margin-top:56px; width:100%; max-width:920px; position:relative; z-index:2;
+    border-radius:6px; overflow:hidden; border:1px solid var(--surface-line);
+    box-shadow:0 40px 90px -20px rgba(0,0,0,0.75), 0 0 0 1px rgba(0,0,0,0.4);
+    background:#000;
+  }
+  .hero-video .frame-inner{ position:relative; padding-top:56.25%; }
+  .hero-video iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+  .scroll-cue{
+    margin-top:50px; font-family:'Space Mono',monospace; font-size:10.5px; letter-spacing:0.2em;
+    color:var(--text-faint); text-transform:uppercase; position:relative; z-index:2;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .scroll-cue::after{
+    content:''; width:1px; height:34px; background:linear-gradient(var(--accent), transparent);
+    animation:drop 1.8s ease-in-out infinite;
+  }
+  @keyframes drop{ 0%{opacity:0; transform:translateY(-6px);} 50%{opacity:1;} 100%{opacity:0; transform:translateY(10px);} }
+
+  /* ============ SECTION GENERIC ============ */
+  section{ padding:130px 0; position:relative; }
+  .section-head{ margin-bottom:64px; max-width:640px; }
+  .section-head h2{ font-size:clamp(32px,4.5vw,50px); margin-top:16px; }
+  .section-head p{ color:var(--text-dim); margin-top:18px; font-weight:300; font-size:16px; max-width:560px; }
+
+  .reveal{ opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ============ ABOUT ============ */
+  .about-grid{ display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+  .about-grid p{ font-size:17px; color:var(--text-dim); font-weight:300; margin-bottom:18px; }
+  .about-grid p strong{ color:var(--text); font-weight:500; }
+  .about-stats{ display:grid; grid-template-columns:1fr 1fr; gap:28px 40px; margin-top:8px; }
+  .stat b{ font-family:'Fraunces',serif; font-size:38px; color:var(--accent-soft); display:block; font-weight:500; }
+  .stat span{ font-size:12.5px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.08em; }
+  @media (max-width:820px){ .about-grid{ grid-template-columns:1fr; } }
+
+  /* ============ SERVICES ============ */
+  .services{ background:var(--bg-alt); border-top:1px solid var(--surface-line); border-bottom:1px solid var(--surface-line); }
+  .service-list{ display:flex; flex-direction:column; }
+  .service-row{
+    display:grid; grid-template-columns:280px 1fr; gap:40px; padding:32px 0;
+    border-top:1px solid var(--surface-line); align-items:baseline;
+    transition:padding-left .4s ease;
+  }
+  .service-row:hover{ padding-left:14px; }
+  .service-row:last-child{ border-bottom:1px solid var(--surface-line); }
+  .service-row h3{ font-size:22px; font-weight:500; color:var(--text); }
+  .service-row h3 .glyph{ color:var(--accent); font-style:italic; margin-right:10px; font-family:'Fraunces',serif; }
+  .service-row p{ color:var(--text-dim); font-size:15px; font-weight:300; max-width:520px; }
+  @media (max-width:720px){ .service-row{ grid-template-columns:1fr; gap:10px; } }
+
+  /* ============ WORK ============ */
+  .work-item{ margin-bottom:110px; }
+  .work-item:last-child{ margin-bottom:0; }
+  .work-head{ display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:22px; flex-wrap:wrap; gap:14px; }
+  .work-head h3{ font-size:clamp(24px,3vw,34px); font-weight:500; }
+  .work-head span{ font-family:'Space Mono',monospace; font-size:12px; color:var(--text-faint); letter-spacing:0.06em; }
+  .work-frame{
+    position:relative; border-radius:5px; overflow:hidden; background:#000;
+    border:1px solid var(--surface-line); box-shadow:0 30px 70px -25px rgba(0,0,0,0.7);
+  }
+  .work-frame .frame-inner{ position:relative; padding-top:56.25%; }
+  .work-frame iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .work-caption{ margin-top:18px; color:var(--text-dim); font-size:14.5px; font-weight:300; max-width:640px; }
+
+  /* ============ THUMBNAILS ============ */
+  .thumb-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:18px; }
+  .thumb-tile{
+    aspect-ratio:16/9; border-radius:4px; border:1px solid var(--surface-line);
+    background:linear-gradient(135deg, var(--surface), var(--bg-alt));
+    display:block; overflow:hidden; position:relative;
+    transition:border-color .3s, transform .3s;
+  }
+  .thumb-tile img{ width:100%; height:100%; display:block; object-fit:cover; }
+  .thumb-tile:hover{ border-color:var(--accent-deep); transform:translateY(-3px); }
+
+
+  iframe{ max-width:100%; }
+  img{ max-width:100%; }
+
+  /* ============ MOBILE ============ */
+  @media (max-width:760px){
+    nav{ padding:18px 20px; }
+    .logo{ font-size:19px; }
+    .wrap{ padding:0 18px; }
+    section{ padding:88px 0; }
+    .hero{ min-height:auto; padding:120px 18px 70px; }
+    .hero h1{ font-size:clamp(48px, 15vw, 76px); }
+    .hero p.tag{ font-size:15px; max-width:430px; }
+    .hero-video{ margin-top:38px; border-radius:4px; }
+    .section-head{ margin-bottom:42px; }
+    .section-head h2{ font-size:34px; }
+    .about-grid{ gap:34px; }
+    .about-grid p{ font-size:15.5px; }
+    .about-stats{ gap:20px; }
+    .stat b{ font-size:31px; }
+    .service-row{ padding:25px 0; }
+    .service-row h3{ font-size:20px; line-height:1.25; }
+    .service-row p{ font-size:14px; }
+    .work-item{ margin-bottom:72px; }
+    .work-head{ align-items:flex-start; }
+    .work-head h3{ font-size:25px; }
+    .work-frame{ border-radius:4px; }
+    .work-caption{ font-size:14px; }
+    .thumb-grid{ grid-template-columns:1fr; gap:14px; }
+    .quote-card{ padding:34px 24px; }
+    .quote-card p.q{ font-size:17px; }
+    .contact{ padding-top:100px; padding-bottom:100px; }
+    .contact h2{ font-size:clamp(42px, 12vw, 68px); line-height:1; }
+    .contact-links{ flex-direction:column; align-items:stretch; gap:12px; }
+    .cbtn{ justify-content:center; width:100%; padding:15px 18px; }
+  }
+  @media (min-width:761px) and (max-width:900px){
+    .wrap{ padding:0 24px; }
+    .thumb-grid{ grid-template-columns:repeat(2, 1fr); }
+  }
+
+  /* ============ TESTIMONIALS ============ */
+  .testimonials{ background:var(--bg-alt); border-top:1px solid var(--surface-line); border-bottom:1px solid var(--surface-line); }
+  .quote-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--surface-line); border:1px solid var(--surface-line); }
+  .quote-card{ background:var(--bg-alt); padding:44px 40px; }
+  .quote-card p.q{ font-family:'Fraunces',serif; font-style:italic; font-size:18px; line-height:1.55; color:var(--text); font-weight:400; }
+  .quote-card .who{ margin-top:22px; display:flex; align-items:center; gap:10px; }
+  .quote-card .who a{ font-size:13px; letter-spacing:0.03em; color:var(--accent-soft); text-decoration:none; border-bottom:1px solid var(--accent-deep); padding-bottom:2px; }
+  @media (max-width:760px){ .quote-grid{ grid-template-columns:1fr; } }
+
+  /* ============ CONTACT ============ */
+  .contact{ text-align:center; padding-top:150px; padding-bottom:150px; }
+  .contact h2{ font-size:clamp(38px,7vw,84px); }
+  .contact h2 em{ font-style:italic; color:var(--accent-soft); }
+  .contact p{ color:var(--text-dim); margin:22px auto 46px; max-width:460px; font-weight:300; }
+  .contact-links{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; }
+  .cbtn{
+    display:inline-flex; align-items:center; gap:10px; padding:16px 30px; border-radius:3px;
+    text-decoration:none; font-size:14px; letter-spacing:0.03em; border:1px solid var(--surface-line);
+    color:var(--text); transition:all .35s ease;
+  }
+  .cbtn.primary{ background:var(--accent); color:#1a1208; border-color:var(--accent); font-weight:500; }
+  .cbtn.primary:hover{ background:var(--accent-soft); }
+  .cbtn:not(.primary):hover{ border-color:var(--accent-deep); color:var(--accent-soft); }
+
+  footer{ padding:40px 0 50px; text-align:center; color:var(--text-faint); font-size:12.5px; letter-spacing:0.03em; }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<nav>
+  <div class="logo">Zakaria</div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#thumbnails">Thumbnails</a></li>
+    <li><a href="#words">Words</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-glow"></div>
+  <p class="eyebrow">Video Editor &amp; Visual Storyteller</p>
+  <h1>Raw footage,<br><em>told</em> right.</h1>
+  <p class="tag">I edit van-builds, van-life journeys, and documentary-style stories for YouTube channels who want their footage to feel cinematic, natural, and true to the road.</p>
+
+  <div class="hero-video reveal in">
+    <div class="frame-inner">
+      <iframe src="https://drive.google.com/file/d/1mdiLUSBd3j6JvJp8xfsR_Kumv--71Xqu/preview" allow="autoplay" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <div class="scroll-cue">Scroll</div>
+</header>
+
+<div class="horizon"></div>
+
+<!-- ============ ABOUT ============ -->
+<section id="about">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="reveal">
+        <p class="eyebrow">About</p>
+        <h2 style="margin-top:16px; font-size:clamp(28px,4vw,42px);">Editing for people who live the story before they film it.</h2>
+      </div>
+      <div class="reveal">
+        <p>I specialize in <strong>van-life, camper build, travel, and documentary-style</strong> videos. My focus is turning raw footage into stories that feel natural, cinematic, and authentic &mdash; never over-produced, never generic.</p>
+        <p>That means careful pacing, considered B-roll, natural sound woven with music, and a color grade that feels consistent without feeling artificial. I work closely with van builders, van-life creators, travelers, and outdoor channels who want their videos to feel more like a film than a vlog.</p>
+        <div class="about-stats">
+          <div class="stat"><b>5+</b><span>Channels edited for</span></div>
+          <div class="stat"><b>Full&nbsp;story</b><span>From raw clip to final cut</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SERVICES ============ -->
+<section id="services" class="services">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Services</p>
+      <h2>What I bring to a channel</h2>
+      <p>Every service below is in service of one thing: making footage feel like it belongs on a screen, not just a hard drive.</p>
+    </div>
+    <div class="service-list">
+      <div class="service-row reveal"><h3><span class="glyph">01</span>Van &amp; Camper Build Videos</h3><p>Documenting the full process of building, renovating, and customizing vans, campers, and trucks &mdash; from raw shell to finished rig.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">02</span>Van-Life &amp; Travel Vlogs</h3><p>Storytelling-focused edits that capture the journey, the lifestyle, the places, and the moments in between.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">03</span>Documentary-Style Videos</h3><p>Cinematic storytelling with strong pacing, natural sound, music, B-roll, and carefully chosen moments.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">04</span>YouTube Video Editing</h3><p>Long-form videos with engaging pacing, clean cuts, sound design, color correction, and a clear narrative arc.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">05</span>B-Roll &amp; Cinematic Editing</h3><p>Using footage, music, ambient sound, and transitions to make every story more immersive.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">06</span>Sound Design &amp; Music</h3><p>Building atmosphere and emotion through music selection, ambient layers, and sound effects.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">07</span>Color Correction &amp; Grading</h3><p>Giving footage a clean, cinematic, and consistent look across an entire video &mdash; and an entire channel.</p></div>
+      <div class="service-row reveal"><h3><span class="glyph">08</span>Thumbnails &amp; Basic Graphics</h3><p>Visuals that match the style and story of the channel, built to earn the click without misleading it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORK ============ -->
+<section id="work">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Selected Work</p>
+      <h2>Five stories, five channels</h2>
+      <p>Full-length edits made for real YouTube channels &mdash; click into any frame to watch.</p>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-head"><h3>Van Build &amp; Renovation Story</h3><span>Full-Length Edit</span></div>
+      <div class="work-frame"><div class="frame-inner"><iframe src="https://drive.google.com/file/d/1mdiLUSBd3j6JvJp8xfsR_Kumv--71Xqu/preview" allowfullscreen loading="lazy"></iframe></div></div>
+      <p class="work-caption">Documenting a build process end to end &mdash; pacing the satisfaction of progress, with sound design carrying the workshop atmosphere.</p>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-head"><h3>Van-Life Travel Vlog</h3><span>Full-Length Edit</span></div>
+      <div class="work-frame"><div class="frame-inner"><iframe src="https://drive.google.com/file/d/1m4DSgssbjVsiSSB6xmxHNNh3lNdsG6eR/preview" allowfullscreen loading="lazy"></iframe></div></div>
+      <p class="work-caption">A journey-led cut &mdash; leaning on natural sound, B-roll, and music to carry the feeling of the road.</p>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-head"><h3>Documentary-Style Story</h3><span>Full-Length Edit</span></div>
+      <div class="work-frame"><div class="frame-inner"><iframe src="https://drive.google.com/file/d/1Olc5fAbIFOkdAcezBZTI6Q2O9cTQBEB1/preview" allowfullscreen loading="lazy"></iframe></div></div>
+      <p class="work-caption">Cinematic pacing built around carefully selected moments, graded for a consistent, filmic look.</p>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-head"><h3>Camper Build Documentation</h3><span>Full-Length Edit</span></div>
+      <div class="work-frame"><div class="frame-inner"><iframe src="https://drive.google.com/file/d/1JRjIBrN5Y0qw-N2RvaNuclIzb5y4JtUk/preview" allowfullscreen loading="lazy"></iframe></div></div>
+      <p class="work-caption">A process-driven edit balancing technical detail with the emotional payoff of a finished build.</p>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-head"><h3>Travel &amp; Outdoor Story</h3><span>Full-Length Edit</span></div>
+      <div class="work-frame"><div class="frame-inner"><iframe src="https://drive.google.com/file/d/15oNm2uwt8JSlOZgrmWhGRpgmI_HvVLv4/preview" allowfullscreen loading="lazy"></iframe></div></div>
+      <p class="work-caption">Wide, patient shots cut against tighter moments &mdash; built to feel unhurried, like the trip itself.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="horizon"></div>
+
+<!-- ============ THUMBNAILS ============ -->
+<section id="thumbnails">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Thumbnails &amp; Graphics</p>
+      <h2>Visuals that earn the click</h2>
+      <p>A selection of van-life and travel visuals designed to match the cinematic style of the channels I edit for.</p>
+    </div>
+    <div class="thumb-grid reveal">
+      <div class="thumb-tile"><img src="images/thumbnail-01.jpg" alt="Van parked in a forest"></div>
+      <div class="thumb-tile"><img src="images/thumbnail-02.jpg" alt="Van life in the mountains"></div>
+      <div class="thumb-tile"><img src="images/thumbnail-03.jpg" alt="Van life at sunset by a lake"></div>
+      <div class="thumb-tile"><img src="images/thumbnail-04.jpg" alt="Camper van in the mountains at golden hour"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section id="words" class="testimonials">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <p class="eyebrow">Client Words</p>
+      <h2>From the channels I've worked with</h2>
+    </div>
+  </div>
+  <div class="quote-grid reveal">
+    <div class="quote-card">
+      <p class="q">&ldquo;Working with Zakaria made the editing process incredibly smooth. He understood the story we wanted to tell and turned our raw footage into engaging, cinematic videos that captured the feeling of our van-life journey.&rdquo;</p>
+      <div class="who"><a href="https://www.youtube.com/@TimKatie" target="_blank" rel="noopener">Tim &amp; Katie ↗</a></div>
+    </div>
+    <div class="quote-card">
+      <p class="q">&ldquo;Zakaria has a great eye for storytelling. He took our raw footage and turned it into a video that felt natural, cinematic, and engaging from beginning to end.&rdquo;</p>
+      <div class="who"><a href="https://www.youtube.com/@lucasravizza" target="_blank" rel="noopener">Lucas Ravizza ↗</a></div>
+    </div>
+    <div class="quote-card">
+      <p class="q">&ldquo;Zakaria did an excellent job bringing our build content to life. He knows how to make the process of building something feel interesting and satisfying to watch.&rdquo;</p>
+      <div class="who"><a href="https://www.youtube.com/@BuildStudioHQ" target="_blank" rel="noopener">Build Studio HQ ↗</a></div>
+    </div>
+    <div class="quote-card">
+      <p class="q">&ldquo;Working with Zakaria was a great experience. He understood our visual style and created edits that felt authentic while still being polished and cinematic.&rdquo;</p>
+      <div class="who"><a href="https://www.youtube.com/@LoveSundays" target="_blank" rel="noopener">Love Sundays ↗</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section id="contact" class="contact">
+  <div class="wrap">
+    <p class="eyebrow" style="justify-content:center;">Let's work together</p>
+    <h2 style="margin-top:18px;">Got footage that<br>needs a <em>story?</em></h2>
+    <p>Van builds, road trips, documentaries &mdash; if it's real and it's on the road, I want to cut it.</p>
+    <div class="contact-links">
+      <a class="cbtn primary" href="mailto:zakariaediting9@gmail.com">Email — zakariaediting9@gmail.com</a>
+      <a class="cbtn" href="https://wa.me/213549250106" target="_blank" rel="noopener">WhatsApp — +213 549 250 106</a>
+    </div>
+  </div>
+</section>
+
+<footer>Zakaria — Video Editor &amp; Visual Storyteller · Cutting stories from the road</footer>
+
+<script>
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); } });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+</script>
+
+</body>
+</html>
